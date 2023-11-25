@@ -1,0 +1,18 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Your time</title>
+</head>
+<body>
+<p>
+    <span>Selected Timezone: </span> <span th:text="${selectedTimezone}"></span>
+</p>
+<p>
+    <span>Current Time: </span> <span th:text="${currentTime}"></span>
+</p>
+
+<form action="/" method="GET">
+    <input type="submit" value="Return">
+</form>
+</body>
+</html>

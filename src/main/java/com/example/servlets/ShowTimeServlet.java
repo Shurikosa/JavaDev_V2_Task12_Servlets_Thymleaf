@@ -19,24 +19,13 @@ import java.time.format.DateTimeFormatter;
 
 @WebServlet("/showTime")
 public class ShowTimeServlet extends HttpServlet {
-
+        private String timezone;
+        private ZoneId zoneId;
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-        String timezone = request.getParameter("timezone");
-        ZoneId zoneId = ZoneId.of(timezone);
-        if ("Show from cookies".equals(request.getParameter("showFromCookies"))){
-            Cookie[] cookies = request.getCookies();
-            if(cookies != null){
-                for (Cookie cookie : cookies){
-                    if(cookie.getName().equals("timezone")){
-                        zoneId = ZoneId.of(cookie.getValue());
-                    }
-                }
-            }
-        }
-        Cookie timezoneCookie = new Cookie("timezone", timezone);
-        timezoneCookie.setMaxAge(24 * 60);
-        response.addCookie(timezoneCookie);
-
+         timezone = request.getParameter("timezone");
+        zoneId = timezone != null ? ZoneId.of(timezone) : null;
+        checkCookies(request);
+        putCookies(timezone, response);
         ZonedDateTime currentTime = ZonedDateTime.now(zoneId);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedTime = currentTime.format(formatter);
@@ -50,5 +39,24 @@ public class ShowTimeServlet extends HttpServlet {
         context.setVariable("selectedTimezone", zoneId.getId());
         templateEngine.process("show_time", context, response.getWriter());
 
+    }
+
+    private void putCookies(String timezone, HttpServletResponse response){
+        Cookie timezoneCookie = new Cookie("timezone", timezone);
+        timezoneCookie.setMaxAge(24 * 60);
+        response.addCookie(timezoneCookie);
+    }
+    private void checkCookies(HttpServletRequest request){
+        if (request.getParameter("timezone") == null){
+            Cookie[] cookies = request.getCookies();
+            if(cookies != null){
+                for (Cookie cookie : cookies){
+                    if(cookie.getName().equals("timezone")){
+                        zoneId = ZoneId.of(cookie.getValue());
+                        timezone = cookie.getValue();
+                    }
+                }
+            }
+        }
     }
 }
